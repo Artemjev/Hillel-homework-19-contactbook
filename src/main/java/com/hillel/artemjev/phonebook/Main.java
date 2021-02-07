@@ -38,7 +38,7 @@ public class Main {
                 propertiesFile = "app-prod.properties";
                 break;
             default:
-                System.out.println("Не задан параметр запуска contactbook.profile");
+                System.out.println("Contactbook.profile launch parameter not set");
                 return;
         }
 
@@ -46,6 +46,7 @@ public class Main {
         try {
             properties.load(new FileInputStream(propertiesFile));
         } catch (IOException e) {
+            System.out.println("Properties file loading problem: " + e.getMessage());
             e.printStackTrace();
         }
 
@@ -94,8 +95,8 @@ public class Main {
                 contactsService = new InMemoryContactsService(userService, new LinkedList<Contact>());
                 break;
             default:
-                System.out.printf("Не задан параметр app.service.workmode в файле %s или задан не корректно.",
-                        propertiesFile);
+                System.out.printf("The app.service.workmode parameter was not set in the %s file, " +
+                        "or it was set incorrectly.", propertiesFile);
                 return;
         }
 
