@@ -58,7 +58,7 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.hillel.artemjev.phonebook.Main</mainClass>
+                            <mainClass>com.hillel.artemjev.contactbook.Main</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
