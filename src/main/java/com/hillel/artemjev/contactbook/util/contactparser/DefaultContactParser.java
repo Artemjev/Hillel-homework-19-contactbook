@@ -1,7 +1,8 @@
-package com.hillel.artemjev.contactbook.util;
+package com.hillel.artemjev.contactbook.util.contactparser;
 
 import com.hillel.artemjev.contactbook.entities.Contact;
 import com.hillel.artemjev.contactbook.exception.ContactParseException;
+import com.hillel.artemjev.contactbook.util.contactparser.ContactParser;
 
 import java.util.LinkedList;
 import java.util.List;

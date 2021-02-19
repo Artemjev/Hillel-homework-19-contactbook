@@ -2,7 +2,7 @@ package com.hillel.artemjev.contactbook.services.contacts;
 
 import com.hillel.artemjev.contactbook.entities.Contact;
 import com.hillel.artemjev.contactbook.services.user.UserService;
-import com.hillel.artemjev.contactbook.util.DefaultContactParser;
+import com.hillel.artemjev.contactbook.util.contactparser.DefaultContactParser;
 import com.hillel.artemjev.contactbook.util.NioFileUtil;
 import lombok.RequiredArgsConstructor;
 

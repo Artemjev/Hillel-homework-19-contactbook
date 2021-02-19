@@ -1,6 +1,5 @@
 package com.hillel.artemjev.contactbook.services.user;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hillel.artemjev.contactbook.dto.user.LoginRequest;
 import com.hillel.artemjev.contactbook.dto.user.LoginResponse;
@@ -10,10 +9,10 @@ import com.hillel.artemjev.contactbook.entities.User;
 import com.hillel.artemjev.contactbook.dto.*;
 import com.hillel.artemjev.contactbook.services.AccessToken;
 import com.hillel.artemjev.contactbook.util.UserDtoBuilder;
+import com.hillel.artemjev.contactbook.util.httprequest.HttpRequestFactory;
 import lombok.RequiredArgsConstructor;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -21,12 +20,14 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @RequiredArgsConstructor
 public class ApiUserService implements UserService {
     private final String baseUri;
     private final UserDtoBuilder userDtoBuilder;
     final private AccessToken token;
     private final ObjectMapper mapper;
+    private final HttpRequestFactory httpRequestFactory;
     private final HttpClient httpClient;
 
     @Override
@@ -38,7 +39,10 @@ public class ApiUserService implements UserService {
     public void register(User user) {
         RegisterRequest registerRequest = userDtoBuilder.getRegisterRequest(user);
         try {
-            HttpRequest request = createPostRequest("/register", registerRequest);
+            HttpRequest request = httpRequestFactory.createPostRequest(
+                    baseUri + "/register",
+                    registerRequest
+            );
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             StatusResponse statusResponse = mapper.readValue(response.body(), StatusResponse.class);
             if (!statusResponse.isSuccess()) {
@@ -53,7 +57,10 @@ public class ApiUserService implements UserService {
     public void login(User user) {
         LoginRequest loginRequest = userDtoBuilder.getLoinRequest(user);
         try {
-            HttpRequest request = createPostRequest("/login", loginRequest);
+            HttpRequest request = httpRequestFactory.createPostRequest(
+                    baseUri + "/login",
+                    loginRequest
+            );
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             LoginResponse loginResponse = mapper.readValue(response.body(), LoginResponse.class);
             if (!loginResponse.isSuccess()) {
@@ -67,11 +74,7 @@ public class ApiUserService implements UserService {
 
     @Override
     public List<User> getAll() {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://mag-contacts-api.herokuapp.com/users"))
-                .GET()
-                .header("Accept", "application/json")
-                .build();
+        HttpRequest request = httpRequestFactory.createGetRequest(baseUri + "/users");
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             GetUserResponse getUserResponse = mapper.readValue(response.body(), GetUserResponse.class);
@@ -94,15 +97,6 @@ public class ApiUserService implements UserService {
     }
 
     //------------------------------------------------------------------
-    private HttpRequest createPostRequest(String uri, Object request) throws JsonProcessingException {
-        return HttpRequest.newBuilder()
-                .uri(URI.create(baseUri + uri))
-                .header("Content-Type", "application/json")
-                .header("Accept", "application/json")
-                .POST(HttpRequest.BodyPublishers.ofString(mapper.writeValueAsString(request)))
-                .build();
-    }
-
     private void refreshToken(String token) {
         this.token.refreshToken(token);
     }

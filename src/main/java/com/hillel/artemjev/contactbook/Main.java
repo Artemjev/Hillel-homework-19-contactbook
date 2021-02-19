@@ -1,27 +1,17 @@
 package com.hillel.artemjev.contactbook;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.PropertyNamingStrategy;
 import com.hillel.artemjev.contactbook.config.AppProperties;
 import com.hillel.artemjev.contactbook.config.AppSystemProperties;
 import com.hillel.artemjev.contactbook.config.ConfigLoader;
-import com.hillel.artemjev.contactbook.entities.Contact;
 import com.hillel.artemjev.contactbook.menu.Menu;
 import com.hillel.artemjev.contactbook.menu.actions.*;
-import com.hillel.artemjev.contactbook.services.AccessToken;
-import com.hillel.artemjev.contactbook.services.contacts.ApiContactsService;
 import com.hillel.artemjev.contactbook.services.contacts.ContactsService;
-import com.hillel.artemjev.contactbook.services.contacts.FileContactsService;
-import com.hillel.artemjev.contactbook.services.contacts.InMemoryContactsService;
-import com.hillel.artemjev.contactbook.services.user.ApiUserService;
-import com.hillel.artemjev.contactbook.services.user.FictiveUserService;
+import com.hillel.artemjev.contactbook.services.factory.ApiServiceFactory;
+import com.hillel.artemjev.contactbook.services.factory.FileServiceFactory;
+import com.hillel.artemjev.contactbook.services.factory.InMemoryServiceFactory;
+import com.hillel.artemjev.contactbook.services.factory.ServiceFactory;
 import com.hillel.artemjev.contactbook.services.user.UserService;
-import com.hillel.artemjev.contactbook.util.ContactDtoBuilder;
-import com.hillel.artemjev.contactbook.util.DefaultContactParser;
-import com.hillel.artemjev.contactbook.util.UserDtoBuilder;
 
-import java.net.http.HttpClient;
-import java.util.LinkedList;
 import java.util.Scanner;
 
 
@@ -37,54 +27,29 @@ public class Main {
             System.out.println("Contactbook.profile launch parameter not set");
             return;
         }
-        AppProperties config = configLoader.getFileProps(AppProperties.class, configFileName);
-        config.checkPropertiesExists();
+        AppProperties appProperties = configLoader.getFileProps(AppProperties.class, configFileName);
+        appProperties.checkPropertiesExists();
 
-        UserService userService = null;
-        ContactsService contactsService = null;
+        ServiceFactory serviceFactory;
 
-        switch (config.getMode()) {
+        switch (appProperties.getMode()) {
             case ("api"):
-                UserDtoBuilder userDtoBuilder = new UserDtoBuilder();
-                AccessToken token = new AccessToken();
-                ObjectMapper mapper = new ObjectMapper()
-                        .setPropertyNamingStrategy(PropertyNamingStrategy.SNAKE_CASE);
-                HttpClient httpClient = HttpClient.newBuilder().build();
-                userService = new ApiUserService(
-                        config.getBaseUri(),
-                        userDtoBuilder,
-                        token,
-                        mapper,
-                        httpClient
-                );
-                ContactDtoBuilder contactDtoBuilder = new ContactDtoBuilder();
-                contactsService = new ApiContactsService(
-                        userService,
-                        config.getBaseUri(),
-                        contactDtoBuilder,
-                        mapper,
-                        httpClient
-                );
+                serviceFactory = new ApiServiceFactory(appProperties);
                 break;
-
             case ("file"):
-                userService = new FictiveUserService();
-                contactsService = new FileContactsService(
-                        userService,
-                        new DefaultContactParser(),
-                        config.getFilePath());
+                serviceFactory = new FileServiceFactory(appProperties);
                 break;
-
             case ("memory"):
-                userService = new FictiveUserService();
-                contactsService = new InMemoryContactsService(userService, new LinkedList<Contact>());
+                serviceFactory = new InMemoryServiceFactory();
                 break;
-
             default:
                 System.out.printf("The app.service.workmode parameter was not set in the %s file, " +
                         "or it was set incorrectly.", configFileName);
                 return;
         }
+
+        UserService userService = serviceFactory.createUserService();
+        ContactsService contactsService = serviceFactory.createContactsService(userService);
 
         Scanner sc = new Scanner(System.in);
         Menu menu = new Menu(sc);

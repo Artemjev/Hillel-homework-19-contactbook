@@ -2,7 +2,7 @@ package com.hillel.artemjev.contactbook.services.contacts;
 
 import com.hillel.artemjev.contactbook.entities.Contact;
 import com.hillel.artemjev.contactbook.services.user.UserService;
-import com.hillel.artemjev.contactbook.util.ContactParser;
+import com.hillel.artemjev.contactbook.util.contactparser.ContactParser;
 import lombok.RequiredArgsConstructor;
 
 import java.io.*;

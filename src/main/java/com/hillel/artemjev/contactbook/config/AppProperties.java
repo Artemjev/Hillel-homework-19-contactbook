@@ -15,7 +15,6 @@ public class AppProperties {
     @PropertyName("file.path")
     private String filePath;
 
-
     public void checkPropertiesExists() {
         if (this.mode == null) {
             throw new FailLoadPropertiesFromFileException("\"mode\" property is empty");

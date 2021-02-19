@@ -1,4 +1,4 @@
-package com.hillel.artemjev.contactbook.util;
+package com.hillel.artemjev.contactbook.util.contactparser;
 
 import com.hillel.artemjev.contactbook.entities.Contact;
 
